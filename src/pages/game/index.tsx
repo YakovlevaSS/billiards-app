@@ -1,23 +1,11 @@
 import { useRef, useEffect, useState } from "react";
 import Menu from "../../components/menu";
+import { calculateSpeedY, calculateSpeedX, calculateImpulseFactor } from "../../components/halpers/calculateFunc";
 
-// Экспортируемые функции для расчетов
-const calculateImpulseFactor = (initialSpeedX: number, initialSpeedY: number): number => {
-  const totalInitialSpeed = Math.sqrt(initialSpeedX ** 2 + initialSpeedY ** 2);
-  return 1 - totalInitialSpeed / 10;
-};
-
-const calculateSpeedX = (currentSpeedX: number, impulseX: number, impulseFactor: number): number => {
-  return currentSpeedX + impulseX * impulseFactor;
-};
-
-const calculateSpeedY = (currentSpeedY: number, impulseY: number, impulseFactor: number): number => {
-  return currentSpeedY + impulseY * impulseFactor;
-};
 
 const Game: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [currentColor, setCurrentColor] = useState<string>("red");
+  const [menuBallId, setMenuBallId] = useState<number | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [balls, setBalls] = useState([
     { id: 0, x: 100, y: 100, radius: 20, color: "red", speedX: 0, speedY: 0 },
@@ -134,13 +122,13 @@ const Game: React.FC = () => {
 
       if (distance <= ball.radius) {
         handleBallClick(ball.id, dx, dy, balls);
+        setMenuBallId(ball.id);
         setMenuVisible(true);
       }
     });
   };
 
   const handleColorChange = (color: string) => {
-    setCurrentColor(color);
     if (menuBallId !== null) {
       setBalls((prevBalls) =>
         prevBalls.map((ball) => {
