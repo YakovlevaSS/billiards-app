@@ -116,111 +116,101 @@ import Menu from "../../components/menu";
 // };
 
 const Game: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const [currentColor, setCurrentColor] = useState<string>("red");
-  const [menuBallId, setMenuBallId] = useState<number | null>(null);
-
-  // Создаем шары изначально
-  const initialBalls = [
-    { id: 1, x: 100, y: 100, radius: 20, color: "red" },
-    { id: 2, x: 200, y: 200, radius: 30, color: "red" },
-    { id: 3, x: 300, y: 300, radius: 40, color: "red" },
-    { id: 4, x: 400, y: 400, radius: 50, color: "red" },
-  ];
-  const [balls, setBalls] =
-    useState<
-      { id: number; x: number; y: number; radius: number; color: string }[]
-    >(initialBalls);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animationId: number;
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      balls.forEach((ball) => {
-        drawBall(ctx, ball);
-      });
-
-      animationId = requestAnimationFrame(animate);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+    const [currentColor, setCurrentColor] = useState<string>("red");
+    const [menuBallId, setMenuBallId] = useState<number | null>(null);
+    const [balls, setBalls] = useState([
+      { id: 1, x: 100, y: 100, radius: 20, color: "red" },
+      { id: 2, x: 200, y: 200, radius: 30, color: "red" },
+      { id: 3, x: 300, y: 300, radius: 40, color: "red" },
+      { id: 4, x: 400, y: 400, radius: 50, color: "red" },
+    ]);
+    const [menuVisible, setMenuVisible] = useState(false);
+  
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+  
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+  
+      let animationId: number;
+  
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+        balls.forEach((ball) => {
+          drawBall(ctx, ball);
+        });
+  
+        animationId = requestAnimationFrame(animate);
+      };
+  
+      animate();
+  
+      return () => cancelAnimationFrame(animationId);
+    }, [balls]);
+  
+    const drawBall = (
+      ctx: CanvasRenderingContext2D,
+      ball: { id: number; x: number; y: number; radius: number; color: string }
+    ) => {
+      ctx.beginPath();
+      ctx.fillStyle = ball.color;
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fill();
     };
-
-    animate();
-
-    return () => cancelAnimationFrame(animationId);
-  }, []);
-
-  const drawBall = (
-    ctx: CanvasRenderingContext2D,
-    ball: { id: number; x: number; y: number; radius: number; color: string }
-  ) => {
-    ctx.beginPath();
-    ctx.fillStyle = ball.color;
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fill();
-  };
-
-  const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    balls.forEach((ball) => {
-      const dx = x - ball.x;
-      const dy = y - ball.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance <= ball.radius) {
-        setMenuBallId(ball.id);
+  
+    const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+  
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+  
+      balls.forEach((ball) => {
+        const dx = x - ball.x;
+        const dy = y - ball.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+  
+        if (distance <= ball.radius) {
+          setMenuBallId(ball.id);
+          setMenuVisible(true);
+        }
+      });
+    };
+  
+    const handleColorChange = (color: string) => {
+      setCurrentColor(color);
+      if (menuBallId !== null) {
+        setBalls((prevBalls) =>
+          prevBalls.map((ball) => {
+            if (ball.id === menuBallId) {
+              return { ...ball, color };
+            }
+            return ball;
+          })
+        );
       }
-    });
-  };
-
-  const handleColorChange = (color: string) => {
-    setCurrentColor(color);
-    if (menuBallId !== null) {
-      setBalls((prevBalls) =>
-        prevBalls.map((ball) => {
-          if (ball.id === menuBallId) {
-            return { ...ball, color };
-          }
-          return ball;
-        })
-      );
-    }
-  };
-
-  return (
-    <div>
-      <Menu onChangeColor={handleColorChange} />
-      <canvas
-        ref={canvasRef}
-        width={800}
-        height={600}
-        onClick={handleCanvasClick}
-        style={{ border: "1px solid black" }}
-      />
-      {balls.map((ball) => (
-        <Ball
-          key={ball.id}
-          x={ball.x}
-          y={ball.y}
-          radius={ball.radius}
-          color={currentColor}
+      setMenuVisible(false); // Закрываем меню после выбора цвета
+    };
+  
+    return (
+      <div>
+        {menuVisible && (
+          <Menu onChangeColor={handleColorChange} setMenuVisible={setMenuVisible} />
+        )}
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={600}
+          onClick={handleCanvasClick}
+          style={{ border: "1px solid black" }}
         />
-      ))}
-    </div>
-  );
-};
-
-export default Game;
+      </div>
+    );
+  };
+  
+  export default Game;
