@@ -53,6 +53,8 @@ const Game: React.FC = () => {
         ball.y += ball.speedY;
         // Проверяем столкновение со стенками
         handleWallCollision(ball);
+        // Проверяем столкновение со всеми остальными шарами
+        handleBallCollisions(ball);
       });
 
       animationId = requestAnimationFrame(animate);
@@ -81,6 +83,78 @@ const Game: React.FC = () => {
     if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvasRef.current!.height) {
       ball.speedY *= -1; // Отражаем шар по оси Y при столкновении со стенкой
     }
+  };
+
+  const handleBallCollisions = (ball: {
+    id: number;
+    x: number;
+    y: number;
+    radius: number;
+    color: string;
+    speedX: number;
+    speedY: number;
+  }) => {
+    balls.forEach((otherBall) => {
+      if (ball.id !== otherBall.id) {
+        const dx = otherBall.x - ball.x;
+        const dy = otherBall.y - ball.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < ball.radius + otherBall.radius) {
+          // Столкновение произошло
+          const angle = Math.atan2(dy, dx);
+          const sin = Math.sin(angle);
+          const cos = Math.cos(angle);
+
+          // Позиции вращения
+          const x1 = 0;
+          const y1 = 0;
+          const x2 = dx * cos + dy * sin;
+          const y2 = dy * cos - dx * sin;
+
+          // Скорости вращения
+          const vx1 = ball.speedX * cos + ball.speedY * sin;
+          const vy1 = ball.speedY * cos - ball.speedX * sin;
+          const vx2 = otherBall.speedX * cos + otherBall.speedY * sin;
+          const vy2 = otherBall.speedY * cos - otherBall.speedX * sin;
+
+          // Скорости после столкновения
+          const vx1Final =
+            (vx1 * (ball.radius - otherBall.radius) +
+              2 * otherBall.radius * vx2) /
+            (ball.radius + otherBall.radius);
+          const vx2Final =
+            (vx2 * (ball.radius - otherBall.radius) +
+              2 * otherBall.radius * vx1) /
+            (ball.radius + otherBall.radius);
+          const vy1Final =
+            (vy1 * (ball.radius - otherBall.radius) +
+              2 * otherBall.radius * vy2) /
+            (ball.radius + otherBall.radius);
+          const vy2Final =
+            (vy2 * (ball.radius - otherBall.radius) +
+              2 * otherBall.radius * vy1) /
+            (ball.radius + otherBall.radius);
+
+          // Обновление скоростей
+          ball.speedX = cos * vx1Final + sin * vy1;
+          ball.speedY = cos * vy1Final - sin * vx1Final;
+          otherBall.speedX = cos * vx2Final + sin * vy2;
+          otherBall.speedY = cos * vy2Final - sin * vx2Final;
+
+          // Обновление позиций
+          const newX1 = ball.x + (x2 - x1) * cos - (y2 - y1) * sin;
+          const newY1 = ball.y + (y2 - y1) * cos + (x2 - x1) * sin;
+          const newX2 = otherBall.x + (x2 - x1) * cos - (y2 - y1) * sin;
+          const newY2 = otherBall.y + (y2 - y1) * cos + (x2 - x1) * sin;
+
+          ball.x = newX1;
+          ball.y = newY1;
+          otherBall.x = newX2;
+          otherBall.y = newY2;
+        }
+      }
+    });
   };
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
