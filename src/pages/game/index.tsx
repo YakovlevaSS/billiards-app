@@ -53,13 +53,28 @@ const Game: React.FC = () => {
   };
 
   const handleWallCollision = (ball: { x: number; y: number; radius: number; speedX: number; speedY: number }) => {
-    if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvasRef.current!.width) {
-      ball.speedX *= -1;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const energyLoss = 0.8; // Пример коэффициента потерь энергии
+
+    if (ball.x - ball.radius < 0) {
+      ball.x = ball.radius; 
+      ball.speedX *= -1 * energyLoss; 
     }
-    if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvasRef.current!.height) {
-      ball.speedY *= -1;
+    if (ball.x + ball.radius > canvas.width) {
+      ball.x = canvas.width - ball.radius; 
+      ball.speedX *= -1 * energyLoss; 
     }
-  };
+    if (ball.y - ball.radius < 0) {
+      ball.y = ball.radius; 
+      ball.speedY *= -1 * energyLoss; 
+    }
+    if (ball.y + ball.radius > canvas.height) {
+      ball.y = canvas.height - ball.radius; 
+      ball.speedY *= -1 * energyLoss; 
+    }
+};
 
   const handleBallCollisions = (ball: { id: number; x: number; y: number; radius: number; speedX: number; speedY: number }) => {
     balls.forEach((otherBall) => {
