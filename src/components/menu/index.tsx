@@ -3,12 +3,12 @@ interface MenuProps {
   }
   
   const Menu: React.FC<MenuProps> = ({ onChangeColor }) => {
-    const colors = ['red', 'green', 'blue', 'yellow'];
+    const colors = ['red', 'blue', 'green'];
   
     return (
       <div>
-        {colors.map((color, index) => (
-          <button key={index} onClick={() => onChangeColor(color)}>
+        {colors.map(color => (
+          <button key={color} onClick={() => onChangeColor(color)} style={{ backgroundColor: color }}>
             {color}
           </button>
         ))}
