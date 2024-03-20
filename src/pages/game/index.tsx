@@ -27,10 +27,10 @@ const Game: React.FC = () => {
   const [currentColor, setCurrentColor] = useState<string>("red");
   const [menuBallId, setMenuBallId] = useState<number | null>(null);
   const [balls, setBalls] = useState([
-    { id: 1, x: 100, y: 100, radius: 20, color: "red", speedX: 0, speedY: 0 },
-    { id: 2, x: 200, y: 200, radius: 30, color: "red", speedX: 0, speedY: 0 },
-    { id: 3, x: 300, y: 300, radius: 40, color: "red", speedX: 0, speedY: 0 },
-    { id: 4, x: 400, y: 400, radius: 50, color: "red", speedX: 0, speedY: 0 },
+    { id: 0, x: 100, y: 100, radius: 20, color: "red", speedX: 0, speedY: 0 },
+    { id: 1, x: 200, y: 200, radius: 30, color: "red", speedX: 0, speedY: 0 },
+    { id: 2, x: 300, y: 300, radius: 40, color: "red", speedX: 0, speedY: 0 },
+    { id: 3, x: 400, y: 400, radius: 50, color: "red", speedX: 0, speedY: 0 },
   ]);
   const [menuVisible, setMenuVisible] = useState(false);
 
