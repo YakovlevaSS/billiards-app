@@ -1,216 +1,155 @@
 import { useRef, useEffect, useState } from "react";
-import Ball from "../../components/ball";
 import Menu from "../../components/menu";
 
-// const Game: React.FC = () => {
-//   const canvasRef = useRef<HTMLCanvasElement>(null);
-//   const [balls, setBalls] = useState<{ x: number, y: number, radius: number, color: string }[]>([]);
-//   const [currentColor, setCurrentColor] = useState<string>('red');
-//   const [mouseDown, setMouseDown] = useState<boolean>(false);
-//   const [mouseStart, setMouseStart] = useState<{ x: number, y: number } | null>(null);
-//   const [mouseMove, setMouseMove] = useState<{ x: number, y: number } | null>(null);
+// Экспортируемые функции для расчетов
+const calculateImpulseFactor = (initialSpeedX: number, initialSpeedY: number): number => {
+  // Пример расчета коэффициента упругости
+  // Можно использовать какую-то формулу, основанную на начальных скоростях
+  const totalInitialSpeed = Math.sqrt(initialSpeedX ** 2 + initialSpeedY ** 2);
+  // Например, можем вернуть обратное значение отношения текущей скорости к максимальной
+  return 1 - totalInitialSpeed /10; // Где MAX_INITIAL_SPEED - максимальная начальная скорость
+};
 
-//   useEffect(() => {
-//     const canvas = canvasRef.current;
-//     if (!canvas) return;
+const calculateSpeedX = (currentSpeedX: number, impulseX: number, impulseFactor: number): number => {
+  // Применяем толчок к текущей скорости по оси X с учетом коэффициента упругости
+  const newSpeedX = currentSpeedX + impulseX * impulseFactor;
+  return newSpeedX;
+};
 
-//     const ctx = canvas.getContext('2d');
-//     if (!ctx) return;
-
-//     let animationId: number;
-
-//     const animate = () => {
-//       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-//       // Draw balls
-//       balls.forEach(ball => {
-//         drawBall(ctx, ball);
-//       });
-
-//       if (mouseDown && mouseStart && mouseMove) {
-//         ctx.beginPath();
-//         ctx.moveTo(mouseStart.x, mouseStart.y);
-//         ctx.lineTo(mouseMove.x, mouseMove.y);
-//         ctx.stroke();
-//       }
-
-//       animationId = requestAnimationFrame(animate);
-//     };
-
-//     animate();
-
-//     return () => cancelAnimationFrame(animationId);
-//   }, [balls, mouseDown, mouseStart, mouseMove]);
-
-//   const drawBall = (ctx: CanvasRenderingContext2D, ball: { x: number, y: number, radius: number, color: string }) => {
-//     ctx.beginPath();
-//     ctx.fillStyle = ball.color;
-//     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-//     ctx.fill();
-//   };
-
-//   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-//     const canvas = canvasRef.current;
-//     if (!canvas) return;
-
-//     const rect = canvas.getBoundingClientRect();
-//     const x = event.clientX - rect.left;
-//     const y = event.clientY - rect.top;
-
-//     // Добавляем новый шар в массив balls при клике
-//     setBalls(prevBalls => [...prevBalls, { x, y, radius: 20, color: currentColor }]);
-//   };
-
-//   const handleColorChange = (color: string) => {
-//     setCurrentColor(color);
-//   };
-
-//   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
-//     setMouseDown(true);
-//     setMouseStart({ x: event.clientX, y: event.clientY });
-//   };
-
-//   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-//     if (!mouseDown || !mouseStart) return;
-
-//     const canvas = canvasRef.current;
-//     if (!canvas) return;
-
-//     const rect = canvas.getBoundingClientRect();
-//     const x = event.clientX - rect.left;
-//     const y = event.clientY - rect.top;
-
-//     setMouseMove({ x, y });
-//   };
-
-//   const handleMouseUp = () => {
-//     setMouseStart(null);
-//     setMouseDown(false);
-//     setMouseMove(null);
-//   };
-
-//   return (
-//     <div>
-//       <Menu onChangeColor={handleColorChange} />
-//       <canvas
-//         ref={canvasRef}
-//         width={800}
-//         height={600}
-//         onClick={handleCanvasClick}
-//         onMouseDown={handleMouseDown}
-//         onMouseMove={handleMouseMove}
-//         onMouseUp={handleMouseUp}
-//         style={{ border: '1px solid black' }}
-//       />
-//       {balls.map((ball, index) => (
-//         <Ball
-//           key={index}
-//           x={ball.x}
-//           y={ball.y}
-//           radius={ball.radius}
-//           color={ball.color}
-//         />
-//       ))}
-//     </div>
-//   );
-// };
+const calculateSpeedY = (currentSpeedY: number, impulseY: number, impulseFactor: number): number => {
+  // Применяем толчок к текущей скорости по оси Y с учетом коэффициента упругости
+  const newSpeedY = currentSpeedY + impulseY * impulseFactor;
+  return newSpeedY;
+};
 
 const Game: React.FC = () => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-  
-    const [currentColor, setCurrentColor] = useState<string>("red");
-    const [menuBallId, setMenuBallId] = useState<number | null>(null);
-    const [balls, setBalls] = useState([
-      { id: 1, x: 100, y: 100, radius: 20, color: "red" },
-      { id: 2, x: 200, y: 200, radius: 30, color: "red" },
-      { id: 3, x: 300, y: 300, radius: 40, color: "red" },
-      { id: 4, x: 400, y: 400, radius: 50, color: "red" },
-    ]);
-    const [menuVisible, setMenuVisible] = useState(false);
-  
-    useEffect(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-  
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-  
-      let animationId: number;
-  
-      const animate = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-        balls.forEach((ball) => {
-          drawBall(ctx, ball);
-        });
-  
-        animationId = requestAnimationFrame(animate);
-      };
-  
-      animate();
-  
-      return () => cancelAnimationFrame(animationId);
-    }, [balls]);
-  
-    const drawBall = (
-      ctx: CanvasRenderingContext2D,
-      ball: { id: number; x: number; y: number; radius: number; color: string }
-    ) => {
-      ctx.beginPath();
-      ctx.fillStyle = ball.color;
-      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      ctx.fill();
-    };
-  
-    const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-  
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [currentColor, setCurrentColor] = useState<string>("red");
+  const [menuBallId, setMenuBallId] = useState<number | null>(null);
+  const [balls, setBalls] = useState([
+    { id: 1, x: 100, y: 100, radius: 20, color: "red", speedX: 0, speedY: 0 },
+    { id: 2, x: 200, y: 200, radius: 30, color: "red", speedX: 0, speedY: 0 },
+    { id: 3, x: 300, y: 300, radius: 40, color: "red", speedX: 0, speedY: 0 },
+    { id: 4, x: 400, y: 400, radius: 50, color: "red", speedX: 0, speedY: 0 },
+  ]);
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationId: number;
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       balls.forEach((ball) => {
-        const dx = x - ball.x;
-        const dy = y - ball.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-  
-        if (distance <= ball.radius) {
-          setMenuBallId(ball.id);
-          setMenuVisible(true);
-        }
+        drawBall(ctx, ball);
+        // Обновляем положение шара на каждом кадре
+        ball.x += ball.speedX;
+        ball.y += ball.speedY;
+        // Проверяем столкновение со стенками
+        handleWallCollision(ball);
       });
+
+      animationId = requestAnimationFrame(animate);
     };
+
+    animate();
+
+    return () => cancelAnimationFrame(animationId);
+  }, [balls]);
+
+  const drawBall = (
+    ctx: CanvasRenderingContext2D,
+    ball: { id: number; x: number; y: number; radius: number; color: string }
+  ) => {
+    ctx.beginPath();
+    ctx.fillStyle = ball.color;
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fill();
+  };
+
+  const handleWallCollision = (ball: { id: number; x: number; y: number; radius: number; color: string; speedX: number; speedY: number }) => {
+    // Проверяем столкновение со стенками
+    if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvasRef.current!.width) {
+      ball.speedX *= -1; // Отражаем шар по оси X при столкновении со стенкой
+    }
+    if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvasRef.current!.height) {
+      ball.speedY *= -1; // Отражаем шар по оси Y при столкновении со стенкой
+    }
+  };
+
+  const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
   
-    const handleColorChange = (color: string) => {
-      setCurrentColor(color);
-      if (menuBallId !== null) {
-        setBalls((prevBalls) =>
-          prevBalls.map((ball) => {
-            if (ball.id === menuBallId) {
-              return { ...ball, color };
-            }
-            return ball;
-          })
-        );
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+  
+    balls.forEach((ball) => {
+      const dx = mouseX - ball.x;
+      const dy = mouseY - ball.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+  
+      if (distance <= ball.radius) {
+        // Вызываем handleBallClick при клике на шаре, передавая его идентификатор и вектор толчка
+        handleBallClick(ball.id, dx, dy, balls); // передаем также массив balls
+        setMenuBallId(ball.id);
+        setMenuVisible(true);
       }
-      setMenuVisible(false); // Закрываем меню после выбора цвета
-    };
-  
-    return (
-      <div>
-        {menuVisible && (
-          <Menu onChangeColor={handleColorChange} setMenuVisible={setMenuVisible} />
-        )}
-        <canvas
-          ref={canvasRef}
-          width={800}
-          height={600}
-          onClick={handleCanvasClick}
-          style={{ border: "1px solid black" }}
-        />
-      </div>
+    });
+  };
+
+  const handleColorChange = (color: string) => {
+    setCurrentColor(color);
+    if (menuBallId !== null) {
+      setBalls((prevBalls) =>
+        prevBalls.map((ball) => {
+          if (ball.id === menuBallId) {
+            return { ...ball, color };
+          }
+          return ball;
+        })
+      );
+    }
+    setMenuVisible(false);
+  };
+
+  const handleBallClick = (ballId: number, impulseX: number, impulseY: number, balls: any[]) => {
+    // Расчет коэффициента упругости
+    const impulseFactor = calculateImpulseFactor(balls[ballId].speedX, balls[ballId].speedY);
+    // Расчет новых скоростей по осям X и Y
+    const newSpeedX = calculateSpeedX(balls[ballId].speedX, impulseX, impulseFactor);
+    const newSpeedY = calculateSpeedY(balls[ballId].speedY, impulseY, impulseFactor);
+    setBalls((prevBalls) =>
+      prevBalls.map((ball) => {
+        if (ball.id === ballId) {
+          return { ...ball, speedX: newSpeedX, speedY: newSpeedY };
+        }
+        return ball;
+      })
     );
   };
-  
-  export default Game;
+
+  return (
+    <div>
+      {menuVisible && (
+        <Menu onChangeColor={handleColorChange} setMenuVisible={setMenuVisible} />
+      )}
+      <canvas
+        ref={canvasRef}
+        width={800}
+        height={600}
+        onClick={handleCanvasClick}
+        style={{ border: "1px solid black" }}
+      />
+    </div>
+  );
+};
+
+export default Game;
