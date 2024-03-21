@@ -1,0 +1,32 @@
+.menuContainer {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    display: flex;
+    gap: 10px;
+    flex-direction:column;
+    
+  }
+  
+  .closeButton {
+    float: right;
+    padding: 5px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+  }
+  
+  .colorButton {
+    display: block;
+    margin-bottom: 5px;
+    width: 100px;
+    height: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
