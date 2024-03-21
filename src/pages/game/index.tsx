@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useRef, useEffect, useState } from "react";
 import Menu from "../../components/menu";
 import { calculateSpeedY, calculateSpeedX, calculateImpulseFactor } from "../../components/halpers/calculateFunc";
@@ -41,7 +42,8 @@ const Game: React.FC = () => {
     animate();
 
     return () => cancelAnimationFrame(animationId);
-  }, [balls]);
+  
+}, [balls]);
 
   const drawBall = (
     ctx: CanvasRenderingContext2D,
