@@ -1,16 +1,18 @@
+import styles from './menu.module.css';
+
 interface MenuProps {
   onChangeColor: (color: string) => void;
   setMenuVisible: (isVisible: boolean) => void;
 }
 
 const Menu: React.FC<MenuProps> = ({ onChangeColor, setMenuVisible }) => {
-  const colors = ["red", "blue", "green"];
+    const colors = ["SkyBlue", "DodgerBlue", "Turquoise", "SteelBlue" ];
 
   return (
-    <div>
+    <div className={styles.menuContainer}>
       <button
-        onClick={() => {setMenuVisible(false)}}
-        style={{ float: "right", padding: "5px" }}
+        className={styles.closeButton}
+        onClick={() => setMenuVisible(false)}
       >
         ✖️
       </button>
@@ -18,10 +20,8 @@ const Menu: React.FC<MenuProps> = ({ onChangeColor, setMenuVisible }) => {
         <button
           key={color}
           onClick={() => onChangeColor(color)}
-          style={{
-            backgroundColor: color,
-            border: "2px solid black",
-          }}
+          className={styles.colorButton}
+          style={{ backgroundColor: color }}
         >
           {color}
         </button>

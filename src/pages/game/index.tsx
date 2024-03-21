@@ -2,16 +2,17 @@ import { useRef, useEffect, useState } from "react";
 import Menu from "../../components/menu";
 import { calculateSpeedY, calculateSpeedX, calculateImpulseFactor } from "../../components/halpers/calculateFunc";
 
+import styles from './game.module.css';
 
 const Game: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [menuBallId, setMenuBallId] = useState<number | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [balls, setBalls] = useState([
-    { id: 0, x: 100, y: 100, radius: 20, color: "red", speedX: 0, speedY: 0 },
-    { id: 1, x: 200, y: 200, radius: 30, color: "red", speedX: 0, speedY: 0 },
-    { id: 2, x: 300, y: 300, radius: 40, color: "red", speedX: 0, speedY: 0 },
-    { id: 3, x: 400, y: 400, radius: 50, color: "red", speedX: 0, speedY: 0 },
+    { id: 0, x: 100, y: 100, radius: 20, color: "SkyBlue", speedX: 0, speedY: 0 },
+    { id: 1, x: 200, y: 200, radius: 30, color: "SkyBlue", speedX: 0, speedY: 0 },
+    { id: 2, x: 300, y: 300, radius: 40, color: "SkyBlue", speedX: 0, speedY: 0 },
+    { id: 3, x: 400, y: 150, radius: 50, color: "SkyBlue", speedX: 0, speedY: 0 },
   ]);
 
   useEffect(() => {
@@ -154,7 +155,6 @@ const Game: React.FC = () => {
         })
       );
     }
-    setMenuVisible(false);
   };
 
   const handleBallClick = (ballId: number, impulseX: number, impulseY: number, balls: any[]) => {
@@ -172,7 +172,8 @@ const Game: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className={styles.Wrap}>
+        <h1>Billiard Game</h1>
       {menuVisible && (
         <Menu onChangeColor={handleColorChange} setMenuVisible={setMenuVisible} />
       )}
@@ -181,6 +182,7 @@ const Game: React.FC = () => {
         width={800}
         height={600}
         onClick={handleCanvasClick}
+        className={styles.Field}
         style={{ border: "1px solid black" }}
       />
     </div>
