@@ -21,4 +21,4 @@
 Приложение будет запущено на http://localhost:3000.
 
 ## Диплой пректа:
-https://leafy-smakager-496a59.netlify.app
+https://master--classy-kelpie-5c04bf.netlify.app/
